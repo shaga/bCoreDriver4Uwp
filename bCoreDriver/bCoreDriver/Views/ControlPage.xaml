@@ -1,0 +1,122 @@
+﻿<Page
+    x:Class="bCoreDriver.Views.ControlPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:bCoreDriver.Views"
+    xmlns:converters="using:bCoreDriver.Views.Converters"
+    xmlns:customViews="using:bCoreDriver.Views.CustomViews"
+    xmlns:viewModels="using:bCoreDriver.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <Page.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
+    </Page.Resources>
+
+    <Page.DataContext>
+        <viewModels:ControlPageViewModel />
+    </Page.DataContext>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Setting" Command="{Binding CommandOpenSetting}"/>
+            </CommandBar.PrimaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+    
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4"
+                    HorizontalAlignment="Center" Orientation="Horizontal">
+            <TextBlock Text="Vattery:"/>
+            <TextBlock Text="4190"/>
+            <TextBlock Text="[mV]"></TextBlock>
+        </StackPanel>
+        
+        <local:UniformGrid Grid.Row="0" Grid.RowSpan="3" Grid.Column="0" 
+                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                           Rows="1" Columns="{Binding CountLeftSlider}" FlowDirection="LeftToRight">
+            <customViews:BcoreSlider Style="{StaticResource MotorSliderStyle}" Header="Mot1"
+                                     Value="{Binding Info.MotorValue1, Mode=TwoWay}" 
+                                     FuncType="Motor" Index="0" IsAutoReset="True"
+                                     CommandValueUpdated="{Binding CommandValueUpdated}"
+                                     Visibility="{Binding IsVisibleMotor1, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <customViews:BcoreSlider Style="{StaticResource MotorSliderStyle}" Header="Mot3"
+                                     Value="{Binding Info.MotorValue3, Mode=TwoWay}" 
+                                     FuncType="Motor" Index="2" IsAutoReset="True"
+                                     CommandValueUpdated="{Binding CommandValueUpdated}"
+                                     Visibility="{Binding IsVisibleMotor3, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </local:UniformGrid>
+        
+        <local:UniformGrid Grid.Row="0" Grid.RowSpan="3" Grid.Column="5"
+                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                           Rows="1" Columns="{Binding CountRightSlider}" FlowDirection="RightToLeft">
+            <customViews:BcoreSlider Style="{StaticResource MotorSliderStyle}" Header="Mot2"
+                                     Value="{Binding Info.MotorValue2, Mode=TwoWay}" 
+                                     FuncType="Motor" Index="1" IsAutoReset="True"
+                                     CommandValueUpdated="{Binding CommandValueUpdated}"
+                                     Visibility="{Binding IsVisibleMotor2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <customViews:BcoreSlider Style="{StaticResource MotorSliderStyle}" Header="Mot4" 
+                                     Value="{Binding Info.MotorValue4, Mode=TwoWay}" 
+                                     FuncType="Motor" Index="3" IsAutoReset="True"
+                                     CommandValueUpdated="{Binding CommandValueUpdated}"
+                                     Visibility="{Binding IsVisibleMotor4, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </local:UniformGrid>
+        
+        <customViews:BcoreSlider Grid.Row="1" Grid.Column="1" Header="Srv1" 
+                                 Style="{StaticResource ServoSliderStyle}"
+                                 FuncType="Servo" Index="0" IsAutoReset="False"
+                                 CommandValueUpdated="{Binding CommandValueUpdated}"
+                                 Value="{Binding Info.ServoValue1, Mode=TwoWay}"
+                                 Visibility="{Binding IsVisibleServo1, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <customViews:BcoreSlider Grid.Row="1" Grid.Column="2" Header="Srv2" 
+                                 Style="{StaticResource ServoSliderStyle}"
+                                 FuncType="Servo" Index="1" IsAutoReset="False"
+                                 CommandValueUpdated="{Binding CommandValueUpdated}"
+                                 Value="{Binding Info.ServoValue2, Mode=TwoWay}"
+                                 Visibility="{Binding IsVisibleServo2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <customViews:BcoreSlider Grid.Row="1" Grid.Column="3" Header="Srv3" 
+                                 Style="{StaticResource ServoSliderStyle}"
+                                 FuncType="Servo" Index="2" IsAutoReset="False"
+                                 CommandValueUpdated="{Binding CommandValueUpdated}"
+                                 Value="{Binding Info.ServoValue3, Mode=TwoWay}"
+                                 Visibility="{Binding IsVisibleServo3, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <customViews:BcoreSlider Grid.Row="1" Grid.Column="4" Header="Srv4" 
+                                 Style="{StaticResource ServoSliderStyle}"
+                                 FuncType="Servo" Index="3" IsAutoReset="False"
+                                 CommandValueUpdated="{Binding CommandValueUpdated}"
+                                 Value="{Binding Info.ServoValue4, Mode=TwoWay}"
+                                 Visibility="{Binding IsVisibleServo4, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        
+        <ToggleButton Grid.Row="2" Grid.Column="1" Content="PO1" Style="{StaticResource TogglePortOutStyle}"
+                      IsChecked="{Binding Info.PortOutValue1, Mode=TwoWay}" 
+                      Visibility="{Binding IsVisiblePortOut1, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ToggleButton Grid.Row="2" Grid.Column="2" Content="PO2" Style="{StaticResource TogglePortOutStyle}"
+                      IsChecked="{Binding Info.PortOutValue2, Mode=TwoWay}"
+                      Visibility="{Binding IsVisiblePortOut2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ToggleButton Grid.Row="2" Grid.Column="3" Content="PO3" Style="{StaticResource TogglePortOutStyle}"
+                      IsChecked="{Binding Info.PortOutValue3, Mode=TwoWay}"
+                      Visibility="{Binding IsVisiblePortOut3, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ToggleButton Grid.Row="2" Grid.Column="4" Content="PO4" Style="{StaticResource TogglePortOutStyle}"
+                      IsChecked="{Binding Info.PortOutValue4, Mode=TwoWay}"
+                      Visibility="{Binding IsVisiblePortOut4, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+    </Grid>
+</Page>
