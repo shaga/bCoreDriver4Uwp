@@ -14,10 +14,6 @@ namespace bCoreDriver.ViewModels
     {
         #region property
 
-        public BcoreSettings Settings { get; set; }
-
-        public BcoreFunctionInfo FunctionInfo { get; set; }
-        
         public string BcoreName
         {
             get { return Settings.BcoreName; }
@@ -29,6 +25,12 @@ namespace bCoreDriver.ViewModels
         }
 
         private string DeviceName { get; set; }
+
+        private BcoreInfo Info { get; set; }
+
+        private BcoreFunctionInfo FunctionInfo => Info?.FunctionInfo;
+
+        public BcoreSettings Settings => Info?.Settings;
 
         #region visibility
 
@@ -69,11 +71,9 @@ namespace bCoreDriver.ViewModels
 
         #region method
 
-        public async void Init(BcoreManager manager)
+        public async void Init(BcoreInfo info)
         {
-            FunctionInfo = manager.FuntcionInfo;
-            DeviceName = manager.DeviceName;
-            Settings = await BcoreSettings.Load(DeviceName);
+            Info = info;
 
             OnPropertyChanged(nameof(Settings));
             Settings.Init();
@@ -81,7 +81,7 @@ namespace bCoreDriver.ViewModels
 
         public async void Finish()
         {
-            await BcoreSettings.Save(DeviceName, Settings);
+            await BcoreSettings.Save(Settings);
         }
 
         private bool IsMotorEnable(int idx)

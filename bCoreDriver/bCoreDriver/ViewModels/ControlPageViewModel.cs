@@ -61,9 +61,9 @@ namespace bCoreDriver.ViewModels
             set { SetProperty(ref _batteryVoltage, value); }
         }
 
-        private BcoreFunctionInfo FunctionInfo { get; set; }
+        private BcoreFunctionInfo FunctionInfo => Info.FunctionInfo;
 
-        private BcoreSettings Settings { get; set; }
+        private BcoreSettings Settings => Info.Settings;
 
         #region motor
 
@@ -108,7 +108,7 @@ namespace bCoreDriver.ViewModels
         public ICommand CommandOpenSetting
             =>
                 _commandOpenSetting ??
-                (_commandOpenSetting = new DelegateCommand(() => AppFrame.Navigate(typeof(BcoreSettingPage), Manager)));
+                (_commandOpenSetting = new DelegateCommand(() => AppFrame.Navigate(typeof(BcoreSettingPage), Info)));
 
         public DelegateCommand<BcoreSliderParam> CommandValueUpdated =>
             _commandValueUpdated ??
@@ -122,25 +122,19 @@ namespace bCoreDriver.ViewModels
 
         public async void Init(DeviceInformation info)
         {
-            if (Manager == null || Manager.DeviceName != info.Name)
-            {
-                Manager?.Dispose();
-                Manager = new BcoreManager(info);
-            }
-
-            var result = await Manager.Init();
+            Info = new BcoreInfo();
+            var result = await Info.Init(info);
 
             if (!result)
             {
+                //ToDo: show message box
                 AppFrame.GoBack();
                 return;
             }
 
-            FunctionInfo = Manager.FuntcionInfo;
-
             InitVisibility();
 
-            BatteryVoltage = await Manager.ReadBattery();
+            BatteryVoltage = await Info.ReadBatteryVoltage();
 
             ReadBatteryTimer = new DispatcherTimer();
             ReadBatteryTimer.Interval = TimeSpan.FromSeconds(ReadBatteryIntervalSec);
@@ -152,14 +146,17 @@ namespace bCoreDriver.ViewModels
         public void Finish()
         {
             if (ReadBatteryTimer?.IsEnabled ?? false) ReadBatteryTimer.Stop();
-            Manager.Dispose();
+            //Manager.Dispose();
+
+            Info.Dispose();
+            Info = null;
         }
 
         private async void OnReadBattery(object sender, object parameter)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () =>
             {
-                BatteryVoltage = await Manager.ReadBattery();
+                BatteryVoltage = await Info.ReadBatteryVoltage();
             });
         }
 
@@ -170,12 +167,17 @@ namespace bCoreDriver.ViewModels
 
             if (FunctionInfo.IsMotorPortEnable(0) && FunctionInfo.IsMotorPortEnable(2))
                 CountLeftSlider = 2;
-            else if (FunctionInfo.IsMotorPortEnable(1) && FunctionInfo.IsMotorPortEnable(3))
+            else if (FunctionInfo.IsMotorPortEnable(0) && FunctionInfo.IsMotorPortEnable(2))
                 CountLeftSlider = 1;
             else
                 CountLeftSlider = 0;
 
-            Settings = await BcoreSettings.Load(Manager.DeviceName);
+            if (FunctionInfo.IsMotorPortEnable(1) && FunctionInfo.IsMotorPortEnable(3))
+                CountRightSlider = 2;
+            else if (FunctionInfo.IsMotorPortEnable(1) && FunctionInfo.IsMotorPortEnable(3))
+                CountRightSlider = 1;
+            else
+                CountRightSlider = 0;
 
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {

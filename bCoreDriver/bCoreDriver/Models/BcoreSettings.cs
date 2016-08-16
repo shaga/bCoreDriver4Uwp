@@ -77,7 +77,7 @@ namespace bCoreDriver.Models
             return settings;
         }
 
-        public static async Task<bool> Save(string name, BcoreSettings settings)
+        public static async Task<bool> Save(BcoreSettings settings)
         {
             await Semaphore.WaitAsync();
             var result = true;

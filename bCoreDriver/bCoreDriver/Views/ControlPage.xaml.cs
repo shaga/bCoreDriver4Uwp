@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using bCoreDriver.ViewModels;
+using bCoreDriver.Models;
 using LibBcore;
 
 // 空白ページのアイテム テンプレートについては、http://go.microsoft.com/fwlink/?LinkId=234238 を参照してください
@@ -54,7 +55,7 @@ namespace bCoreDriver.Views
 
             if (viewModel == null) return;
 
-            if (e.Parameter is BcoreManager) return;
+            if (e.Parameter is BcoreInfo) return;
 
             var frame = Window.Current.Content as Frame;
 

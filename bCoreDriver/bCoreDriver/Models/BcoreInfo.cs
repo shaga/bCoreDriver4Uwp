@@ -14,6 +14,8 @@ namespace bCoreDriver.Models
 {
     class BcoreInfo : BindableBase, IDisposable
     {
+        #region field
+
         private readonly int[] _motorValue =
         {
             Bcore.StopMotorPwm, Bcore.StopMotorPwm,
@@ -30,10 +32,16 @@ namespace bCoreDriver.Models
             false, false, false, false
         };
 
+        #endregion
+
         #region property
 
         public BcoreManager Manager { get; private set; }
         public BcoreSettings Settings { get; private set; }
+
+        public BcoreFunctionInfo FunctionInfo => Manager?.FunctionInfo;
+
+        public string DeviceName => Manager?.DeviceName;
 
         #region motor
 
@@ -131,10 +139,15 @@ namespace bCoreDriver.Models
         
         #endregion
 
-        public BcoreInfo(DeviceInformation info)
+        #region constructor
+
+        public BcoreInfo()
         {
-            Manager = new BcoreManager(info);
         }
+
+        #endregion
+
+        #region method
 
         public void Dispose()
         {
@@ -149,11 +162,33 @@ namespace bCoreDriver.Models
             Manager?.Dispose();
         }
 
-        public async Task<bool> Init()
+        public async Task<bool> Init(DeviceInformation info)
         {
-            Settings = await BcoreSettings.Load(Manager.DeviceName);
+            var result = true;
 
-            return await Manager.Init();
+            if (Manager == null && Manager.DeviceName != info.Name)
+            {
+                Manager?.Dispose();
+                Manager = new BcoreManager(info);
+            }
+
+            if (!Manager.IsInitialized)
+            {
+                result = await Manager.Init();
+            }
+
+            if (!result) return result;
+
+            Settings = await BcoreSettings.Load(DeviceName);
+
+            return result;
+        }
+
+        public async Task<int> ReadBatteryVoltage()
+        {
+            if (Manager == null || !Manager.IsInitialized) return 0;
+
+            return await Manager.ReadBattery();
         }
 
         public void WriteMotorValue(int idx, bool isForce = false)
@@ -211,21 +246,21 @@ namespace bCoreDriver.Models
         {
             if (idx < 0 || Bcore.MaxFunctionCount <= idx) return false;
 
-            return (Manager?.FuntcionInfo?.IsMotorPortEnable(idx) ?? false) && (Settings.MotorSettings[idx].IsShow);
+            return (FuntcionInfo?.IsMotorPortEnable(idx) ?? false) && (Settings.MotorSettings[idx].IsShow);
         }
 
         public bool IsVisibleServo(int idx)
         {
             if (idx < 0 || Bcore.MaxFunctionCount <= idx) return false;
 
-            return (Manager?.FuntcionInfo?.IsServoPortEnable(idx) ?? false) && (Settings.ServoSettings[idx].IsShow);
+            return (FuntcionInfo?.IsServoPortEnable(idx) ?? false) && (Settings.ServoSettings[idx].IsShow);
         }
 
         public bool IsVisiblePortOut(int idx)
         {
             if (idx < 0 || Bcore.MaxFunctionCount <= idx) return false;
 
-            return (Manager?.FuntcionInfo?.IsPortOutEnable(idx) ?? false) && (Settings.PortOutSettings[idx].IsShow);
+            return (FuntcionInfo?.IsPortOutEnable(idx) ?? false) && (Settings.PortOutSettings[idx].IsShow);
         }
 
         private void OnServoSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -247,5 +282,7 @@ namespace bCoreDriver.Models
                 WriteServoValue(idx, _servoValue[0]);
             }
         }
+
+        #endregion
     }
 }

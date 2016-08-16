@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using bCoreDriver.ViewModels;
-using LibBcore;
+using bCoreDriver.Models;
 
 // 空白ページのアイテム テンプレートについては、http://go.microsoft.com/fwlink/?LinkId=234238 を参照してください
 
@@ -35,11 +35,11 @@ namespace bCoreDriver.Views
 
             var viewModel = DataContext as BcoreSettingPageViewModel;
 
-            var manager = e.Parameter as BcoreManager;
+            var info = e.Parameter as BcoreInfo;
 
-            if (viewModel == null || manager == null) return;
+            if (viewModel == null || info == null) return;
 
-            viewModel.Init(manager);
+            viewModel.Init(info);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
