@@ -9,8 +9,6 @@
     xmlns:viewModels="using:bCoreDriver.ViewModels"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:intaractivty="using:Microsoft.Xaml.Interactivity"
-    xmlns:controls="using:Template10.Controls"
-    xmlns:behaviors="using:Template10.Behaviors"
     mc:Ignorable="d"
     >
 
@@ -19,21 +17,266 @@
     </Page.DataContext>
     
     <Page.Resources>
-        <Style TargetType="TextBlock" x:Key="StyleTextHeader">
-            <Setter Property="FontSize" Value="46"/>
-        </Style>
-        <Style TargetType="TextBlock" x:Key="StyleTextSubHeader">
-            <Setter Property="FontSize" Value="32"/>
-        </Style>
-        
-        <Style TargetType="Slider" BasedOn="{StaticResource ServoSliderStyle}" x:Key="StyleSliderTrim">
-            <Setter Property="Orientation" Value="Horizontal"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="5,5,30,5"/>
-            <Setter Property="Value" Value="0"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="3"/>
         </Style>
     </Page.Resources>
-    <ScrollViewer>
+    
+    <!--<Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="4*"/>
+        </Grid.ColumnDefinitions>-->
+
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0"  Text="Name:" HorizontalAlignment="Left"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="8" Text="{Binding Settings.DisplayName}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="Srv1" Visibility="{Binding VisibilityServo1}"/>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="Srv2" Visibility="{Binding VisibilityServo2}"/>
+            <TextBlock Grid.Row="1" Grid.Column="3" Text="Srv3" Visibility="{Binding VisibilityServo3}"/>
+            <TextBlock Grid.Row="1" Grid.Column="4" Text="Srv4" Visibility="{Binding VisibilityServo4}"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Show:"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="1" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo1}"
+                          IsOn="{Binding Settings.ServoSettings[0].IsShow, Mode=TwoWay}" />
+            <ToggleSwitch Grid.Row="2" Grid.Column="2" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo2}"
+                          IsOn="{Binding Settings.ServoSettings[1].IsShow, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="3" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo3}"
+                          IsOn="{Binding Settings.ServoSettings[2].IsShow, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="4" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo4}"
+                          IsOn="{Binding Settings.ServoSettings[3].IsShow, Mode=TwoWay}"/>
+            
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Flip:"/>
+            <ToggleSwitch Grid.Row="3" Grid.Column="1" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo1}"
+                          IsOn="{Binding Settings.ServoSettings[0].IsFlip, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="3" Grid.Column="2" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo2}"
+                          IsOn="{Binding Settings.ServoSettings[1].IsFlip, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="3" Grid.Column="3" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo3}"
+                          IsOn="{Binding Settings.ServoSettings[2].IsFlip, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="3" Grid.Column="4" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo4}"
+                          IsOn="{Binding Settings.ServoSettings[3].IsFlip, Mode=TwoWay}" />
+            
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Sync:"/>
+            <ToggleSwitch Grid.Row="4" Grid.Column="2" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo2}"
+                          IsOn="{Binding Settings.ServoSettings[1].IsSync, Mode=TwoWay}" />
+            <ToggleSwitch Grid.Row="4" Grid.Column="3" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo3}"
+                          IsOn="{Binding Settings.ServoSettings[2].IsSync, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="4" Grid.Column="4" 
+                          Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityServo4}"
+                          IsOn="{Binding Settings.ServoSettings[3].IsSync, Mode=TwoWay}"/>
+            
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Trim:"/>
+            <Slider Grid.Row="5" Grid.Column="1" Style="{StaticResource ServoSliderMobileStyle}"
+                    Minimum="-20" Maximum="20" Visibility="{Binding VisibilityServo1}"
+                    Value="{Binding Settings.ServoSettings[0].Trim, Mode=TwoWay}"/>
+            <Slider Grid.Row="5" Grid.Column="2" Style="{StaticResource ServoSliderMobileStyle}"
+                    Minimum="-20" Maximum="20" Visibility="{Binding VisibilityServo2}"
+                    Value="{Binding Settings.ServoSettings[1].Trim, Mode=TwoWay}"/>
+            <Slider Grid.Row="5" Grid.Column="3" Style="{StaticResource ServoSliderMobileStyle}"
+                    Minimum="-20" Maximum="20" Visibility="{Binding VisibilityServo3}"
+                    Value="{Binding Settings.ServoSettings[2].Trim, Mode=TwoWay}"/>
+            <Slider Grid.Row="5" Grid.Column="4" Style="{StaticResource ServoSliderMobileStyle}"
+                    Minimum="-20" Maximum="20" Visibility="{Binding VisibilityServo4}"
+                    Value="{Binding Settings.ServoSettings[3].Trim, Mode=TwoWay}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="5" Text="PO1" Visibility="{Binding VisibilityPortOut1}"/>
+            <TextBlock Grid.Row="1" Grid.Column="6" Text="PO2" Visibility="{Binding VisibilityPortOut2}"/>
+            <TextBlock Grid.Row="1" Grid.Column="7" Text="PO3" Visibility="{Binding VisibilityPortOut3}"/>
+            <TextBlock Grid.Row="1" Grid.Column="8" Text="PO4" Visibility="{Binding VisibilityPortOut4}"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="5" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut1}"
+                              IsOn="{Binding Settings.PortOutSettings[0].IsShow, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="6" 
+                               Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut2}"
+                              IsOn="{Binding Settings.PortOutSettings[1].IsShow, Mode=TwoWay}"/>
+            <ToggleSwitch Grid.Row="2" Grid.Column="7" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut3}"
+                              IsOn="{Binding Settings.PortOutSettings[2].IsShow, Mode=TwoWay}" />
+            <ToggleSwitch Grid.Row="2" Grid.Column="8" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut4}"
+                              IsOn="{Binding Settings.PortOutSettings[3].IsShow, Mode=TwoWay}" />
+
+            <Grid Grid.Row="3" Grid.RowSpan="3" Grid.Column="5" Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="MO1" Visibility="{Binding VisibilityMotor1}"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="MO2" Visibility="{Binding VisibilityMotor2}"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="MO3" Visibility="{Binding VisibilityMotor3}"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="MO4" Visibility="{Binding VisibilityMotor4}"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Show:"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="1" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor1}"
+                              IsOn="{Binding Settings.MotorSettings[0].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="2" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor2}"
+                              IsOn="{Binding Settings.MotorSettings[1].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="3"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor3}"
+                              IsOn="{Binding Settings.MotorSettings[2].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="4" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor4}"
+                              IsOn="{Binding Settings.MotorSettings[3].IsShow, Mode=TwoWay}"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Show:"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="1" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor1}"
+                              IsOn="{Binding Settings.MotorSettings[0].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="2" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor2}"
+                              IsOn="{Binding Settings.MotorSettings[1].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="3"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor3}"
+                              IsOn="{Binding Settings.MotorSettings[2].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="4"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor4}"
+                              IsOn="{Binding Settings.MotorSettings[3].IsFlip, Mode=TwoWay}"/>
+            </Grid>
+        </Grid>
+        <!--<Grid Grid.Column="1" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            
+            <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Name:" HorizontalAlignment="Left"/>
+                <TextBox Grid.Row="1" Text="{Binding Settings.DisplayName}"/>
+            </Grid>
+
+            <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="PO1" Visibility="{Binding VisibilityPortOut1}"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="PO2" Visibility="{Binding VisibilityPortOut2}"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="PO3" Visibility="{Binding VisibilityPortOut3}"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="PO4" Visibility="{Binding VisibilityPortOut4}"/>
+                
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Show:"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="1" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut1}"
+                              IsOn="{Binding Settings.PortOutSettings[0].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="2" 
+                               Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut2}"
+                              IsOn="{Binding Settings.PortOutSettings[1].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="3" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut3}"
+                              IsOn="{Binding Settings.PortOutSettings[2].IsShow, Mode=TwoWay}" />
+                <ToggleSwitch Grid.Row="1" Grid.Column="4" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityPortOut4}"
+                              IsOn="{Binding Settings.PortOutSettings[3].IsShow, Mode=TwoWay}" />
+            </Grid>
+            
+            <Grid Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="MO1" Visibility="{Binding VisibilityMotor1}"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="MO2" Visibility="{Binding VisibilityMotor2}"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="MO3" Visibility="{Binding VisibilityMotor3}"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="MO4" Visibility="{Binding VisibilityMotor4}"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Show:"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="1" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor1}"
+                              IsOn="{Binding Settings.MotorSettings[0].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="2" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor2}"
+                              IsOn="{Binding Settings.MotorSettings[1].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="3"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor3}"
+                              IsOn="{Binding Settings.MotorSettings[2].IsShow, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="1" Grid.Column="4" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor4}"
+                              IsOn="{Binding Settings.MotorSettings[3].IsShow, Mode=TwoWay}"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Show:"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="1" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor1}"
+                              IsOn="{Binding Settings.MotorSettings[0].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="2" 
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor2}"
+                              IsOn="{Binding Settings.MotorSettings[1].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="3"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor3}"
+                              IsOn="{Binding Settings.MotorSettings[2].IsFlip, Mode=TwoWay}"/>
+                <ToggleSwitch Grid.Row="2" Grid.Column="4"
+                              Style="{StaticResource ToggleSetting}" Visibility="{Binding VisibilityMotor4}"
+                              IsOn="{Binding Settings.MotorSettings[3].IsFlip, Mode=TwoWay}"/>
+            </Grid>
+        </Grid>
+    </Grid>-->
+    
+    <!--<ScrollViewer>
         <StackPanel Orientation="Vertical" Padding="10,5,20,5">
             <TextBlock Style="{StaticResource StyleTextHeader}" Text="Device Setting"/>
             <TextBlock Style="{StaticResource StyleTextSubHeader}" Text="Display Name"/>
@@ -190,6 +433,6 @@
                               Visibility="{Binding VisibilityPortOut4}"/>
             </Grid>
         </StackPanel>
-    </ScrollViewer>
+    </ScrollViewer>-->
 
 </Page>

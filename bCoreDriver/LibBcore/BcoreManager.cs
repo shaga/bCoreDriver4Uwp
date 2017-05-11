@@ -24,7 +24,7 @@ namespace LibBcore
 
         public string DeviceName => BcoreInfo?.Name;
 
-        public BcoreFunctionInfo FuntcionInfo { get; private set;  }
+        public BcoreFunctionInfo FunctionInfo { get; private set;  }
 
         private DeviceInformation BcoreInfo { get; }
 
@@ -67,53 +67,6 @@ namespace LibBcore
             IsInitialized = false;
         }
 
-        public async Task<bool> InitWithPairing()
-        {
-            var tcs = new TaskCompletionSource<GattDeviceService>();
-
-            IsInitialized = false;
-
-            var watcher = DeviceInformation.CreateWatcher(BcoreUuid.BcoreServiceSelector, null);
-            watcher.Added += async (w, i) =>
-            {
-                if (i.Name != BcoreInfo.Name || BcoreService != null || !i.Pairing.IsPaired) return;
-
-                var svc = await GattDeviceService.FromIdAsync(i.Id);
-                Debug.WriteLine($"Found SVC:{svc != null}");
-                if (svc == null) return;
-                tcs.SetResult(svc);
-            };
-
-            watcher.Updated += async (w, u) =>
-            {
-                var device = await DeviceInformation.CreateFromIdAsync(u.Id);
-                if (device.Name != BcoreInfo.Name || BcoreService != null || !device.Pairing.IsPaired) return;
-
-                var svc = await GattDeviceService.FromIdAsync(device.Id);
-                Debug.WriteLine($"Found SVC:{svc != null}");
-                if (svc == null) return;
-                tcs.SetResult(svc);
-            };
-
-            watcher.Start();
-
-            var result = await BcoreInfo.Pairing.PairAsync();
-
-            if (result.Status != DevicePairingResultStatus.AlreadyPaired &&
-                result.Status != DevicePairingResultStatus.Paired)
-            {
-                tcs.SetResult(null);
-            }
-
-            BcoreService = tcs.Task.Result;
-
-            watcher.Stop();
-
-            if (BcoreService == null) return false;
-
-            return true;
-        }
-
         public async Task<bool> Init()
         {
             IsInitialized = false;
@@ -139,7 +92,7 @@ namespace LibBcore
 
             IsInitialized = true;
 
-            FuntcionInfo = await ReadFunctionInfo();
+            FunctionInfo = await ReadFunctionInfo();
 
             return true;
         }

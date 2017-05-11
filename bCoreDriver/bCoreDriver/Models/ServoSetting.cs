@@ -47,6 +47,7 @@ namespace bCoreDriver.Models
             }
         }
 
+        [JsonIgnore]
         public bool IsEnable => !IsSync;
 
         public int Trim
@@ -54,6 +55,9 @@ namespace bCoreDriver.Models
             get { return _trim; }
             set { SetProperty(ref _trim, value); }
         }
+
+        [JsonIgnore]
+        public bool IsInited { get; private set; }
 
         #endregion
 
@@ -65,6 +69,7 @@ namespace bCoreDriver.Models
             OnPropertyChanged(nameof(IsFlip));
             OnPropertyChanged(nameof(IsSync));
             OnPropertyChanged(nameof(Trim));
+            IsInited = true;
         }
 
         #endregion

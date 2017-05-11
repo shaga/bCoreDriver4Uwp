@@ -19,6 +19,12 @@ namespace bCoreDriver.ViewModels
 {
     class ScanPageViewModel : BindableBase
     {
+        #region const
+
+        private static readonly TimeSpan ScanTimeoutSpan = TimeSpan.FromSeconds(30);
+
+        #endregion
+
         #region inner class
 
         public class BcoreInfo
@@ -76,6 +82,8 @@ namespace bCoreDriver.ViewModels
 
         private static Frame AppFrame => Window.Current.Content as Frame;
 
+        private DispatcherTimer ScanTimeoutTimer { get; set; }
+
         #region command
 
         public DelegateCommand CommandScan => _commandScan ?? (_commandScan = new DelegateCommand(Scan));
@@ -95,6 +103,13 @@ namespace bCoreDriver.ViewModels
         {
             Scanner = new BcoreScanner();
             Scanner.FoundBcore += OnFoundBcore;
+
+            ScanTimeoutTimer = new DispatcherTimer();
+            ScanTimeoutTimer.Interval = ScanTimeoutSpan;
+            ScanTimeoutTimer.Tick += (s, e) =>
+            {
+                ScanStop();
+            };
         }
 
         #endregion
@@ -116,15 +131,31 @@ namespace bCoreDriver.ViewModels
         {
             if (IsScanning)
             {
-                Scanner.StopScan();
-                IsScanning = false;
+                ScanStop();
             }
             else
             {
-                FoundBcores.Clear();
-                Scanner.StartScan(false);
-                IsScanning = true;
+                ScanStart();
             }
+        }
+
+        private void ScanStart()
+        {
+            if (IsScanning) return;
+
+            FoundBcores.Clear();
+            Scanner.StartScan();
+            IsScanning = true;
+            ScanTimeoutTimer.Start();
+        }
+
+        private void ScanStop()
+        {
+            if (!IsScanning) return;
+
+            IsScanning = false;
+            if (ScanTimeoutTimer.IsEnabled) ScanTimeoutTimer.Stop();
+            Scanner.StopScan();
         }
 
         private void MovePage(Type page)

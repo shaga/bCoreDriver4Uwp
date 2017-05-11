@@ -17,8 +17,6 @@ namespace LibBcore
 
         private BluetoothLEAdvertisementWatcher AdvertisementWatcher { get; } = new BluetoothLEAdvertisementWatcher();
 
-        private DeviceWatcher DeviceWatcher { get; }
-
         private DeviceInformationCollection PairedBcores { get; set; }
 
         #endregion
@@ -26,7 +24,6 @@ namespace LibBcore
         #region event
 
         public event EventHandler<BcoreFoundEventArgs> FoundBcore;
-        public event EventHandler<BcoreRemovedEventArgs> RemovedBcore;
         public event EventHandler FinishedScan;
 
         #endregion
@@ -39,11 +36,6 @@ namespace LibBcore
             AdvertisementWatcher.AdvertisementFilter.Advertisement.ServiceUuids.Add(BcoreUuid.BcoreService);
             AdvertisementWatcher.Received += OnAdvertisemntReceived;
             AdvertisementWatcher.Stopped += (w, e) => FinishedScan?.Invoke(this, EventArgs.Empty);
-
-            DeviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEDevice.GetDeviceSelectorFromPairingState(false),
-                null);
-            DeviceWatcher.Added += OnDeviceWatcherAdded;
-            DeviceWatcher.Removed += OnDeviceWatherRemoved;
         }
 
         #endregion
@@ -52,27 +44,16 @@ namespace LibBcore
 
         #region public
 
-        public async void StartScan(bool withUnpaired)
+        public async void StartScan()
         {
             await GetPairedBcore();
 
             AdvertisementWatcher.Start();
-
-            if (withUnpaired)
-            {
-                DeviceWatcher.Start();
-            }
         }
 
         public void StopScan()
         {
             AdvertisementWatcher.Stop();
-
-            if (DeviceWatcher.Status == DeviceWatcherStatus.Started ||
-                DeviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
-            {
-                DeviceWatcher.Stop();
-            }
         }
 
         #endregion
@@ -93,18 +74,6 @@ namespace LibBcore
             if (bcore == null) return;
 
             FoundBcore?.Invoke(this, new BcoreFoundEventArgs(bcore));
-        }
-
-        private void OnDeviceWatcherAdded(DeviceWatcher watcher, DeviceInformation info)
-        {
-            if (!info.Name.StartsWith("bCore")) return;
-
-            FoundBcore?.Invoke(this, new BcoreFoundEventArgs(info));
-        }
-
-        private void OnDeviceWatherRemoved(DeviceWatcher watcher, DeviceInformationUpdate update)
-        {
-            RemovedBcore?.Invoke(this, new BcoreRemovedEventArgs(update.Id));
         }
 
         #endregion

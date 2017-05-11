@@ -7,7 +7,10 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Graphics.Display;
+using Windows.System.Profile;
 using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -73,12 +76,21 @@ namespace bCoreDriver
                     //TODO: 以前中断したアプリケーションから状態を読み込みます
                 }
 
+                if (e.PrelaunchActivated) return;
+
                 // フレームを現在のウィンドウに配置します
                 Window.Current.Content = rootFrame;
             }
 
             if (e.PrelaunchActivated == false)
             {
+                if (AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile")
+                {
+                    DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
+                    ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
+                }
+
+
                 if (rootFrame.Content == null)
                 {
                     // ナビゲーション スタックが復元されない場合は、最初のページに移動します。
@@ -86,11 +98,13 @@ namespace bCoreDriver
                     //構成します
                     rootFrame.Navigate(typeof(Views.ScanPage), e.Arguments);
                 }
-                // 現在のウィンドウがアクティブであることを確認します
-                Window.Current.Activate();
-            }
 
-            SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
+                SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
+            }
+            
+
+            // 現在のウィンドウがアクティブであることを確認します
+            Window.Current.Activate();
         }
 
         /// <summary>

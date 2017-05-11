@@ -19,6 +19,12 @@ namespace bCoreDriver.ViewModels
 {
     class PairingPageViewModel : BindableBase
     {
+        #region const
+
+        private static readonly TimeSpan ScanTimeoutSpan = TimeSpan.FromSeconds(30);
+
+        #endregion
+
         #region field
 
         private bool _isScanning;
@@ -56,6 +62,8 @@ namespace bCoreDriver.ViewModels
 
         private static CoreDispatcher Dispatcher => CoreApplication.MainView.Dispatcher;
 
+        private DispatcherTimer ScanTimeoutTimer { get; set; }
+
         #region command
 
         public ICommand CommandScan => _commandScan ?? (_commandScan = new DelegateCommand(Scan));
@@ -75,6 +83,13 @@ namespace bCoreDriver.ViewModels
             Scanner.FoundBcore += OnFoundUnpairBcore;
             Scanner.RemovedBcore += OnRemovedUnpairBcore;
             Scanner.StoppedScan += OnStoppedScan;
+
+            ScanTimeoutTimer = new DispatcherTimer();
+            ScanTimeoutTimer.Interval = ScanTimeoutSpan;
+            ScanTimeoutTimer.Tick += (s, e) =>
+            {
+                ScanStop();
+            };
         }
 
         #endregion
@@ -101,12 +116,19 @@ namespace bCoreDriver.ViewModels
 
         private void ScanStart()
         {
+            if (IsScanning) return;
+
             Scanner.StartScan();
+            ScanTimeoutTimer.Start();   
             IsScanning = true;
         }
 
         private void ScanStop()
         {
+            if (!IsScanning) return;
+
+            IsScanning = false;
+            if (ScanTimeoutTimer.IsEnabled) ScanTimeoutTimer.Stop();
             Scanner.StopScan();
         }
 
@@ -162,12 +184,12 @@ namespace bCoreDriver.ViewModels
                 {
                     FoundBcores.Remove(bcore);
 
-                    var dialog = new ContentDialog
-                    {
-                        Title = "bCore Driver",
-                        Content = $"Please restart bCore \"{bcore.Name}\", if you use it.",
-                        PrimaryButtonText = "OK"
-                    };
+                    var dialog = new ContentDialog();
+                    dialog.Title = "bCore";
+                    dialog.IsPrimaryButtonEnabled = true;
+                    dialog.PrimaryButtonText = "Close";
+                    dialog.Content = $"Restart bCore \"{bcore.Name}\".";
+                    dialog.Padding= new Thickness(2);
                     await dialog.ShowAsync();
                 });
             }

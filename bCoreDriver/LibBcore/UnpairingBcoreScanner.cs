@@ -64,7 +64,8 @@ namespace LibBcore
 
         private void OnDeviceAdded(DeviceWatcher watcher, DeviceInformation device)
         {
-            FoundBcore?.Invoke(this, device);
+            if (device.Name.StartsWith("bCore"))
+                FoundBcore?.Invoke(this, device);
         }
 
         private void OnDeviceRemoved(DeviceWatcher watcher, DeviceInformationUpdate update)

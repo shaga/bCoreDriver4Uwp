@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.Core;
 using Windows.Devices.Enumeration;
+using Windows.System.Profile;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using bCoreDriver.Models;
 using bCoreDriver.Views;
+using bCoreDriver.Views.CustomViews;
 using LibBcore;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -34,9 +36,7 @@ namespace bCoreDriver.ViewModels
         private int _countLeftSlider = 1;
         private int _countRightSlider = 1;
 
-        private readonly int[] _motorValue = {128, 128, 128, 128};
-        private readonly int[] _servoValue = {128, 128, 128, 128};
-        private readonly bool[] _portOutValue = {false, false, false, false};
+        public readonly bool[] _canControlMotor = {false, false, false, false};
 
         private DelegateCommand _commandOpenSetting;
         private DelegateCommand<BcoreSliderParam> _commandValueUpdated;
@@ -50,8 +50,6 @@ namespace bCoreDriver.ViewModels
         private static Frame AppFrame => Window.Current.Content as Frame;
 
         public BcoreInfo Info { get; set; }
-
-        private BcoreManager Manager { get; set; }
 
         private DispatcherTimer ReadBatteryTimer { get; set; }
 
@@ -78,10 +76,64 @@ namespace bCoreDriver.ViewModels
             get { return _countRightSlider; }
             set { SetProperty(ref _countRightSlider, value); }
         }
+
         public bool IsVisibleMotor1 => IsVisibleMotor();
         public bool IsVisibleMotor2 => IsVisibleMotor();
         public bool IsVisibleMotor3 => IsVisibleMotor();
         public bool IsVisibleMotor4 => IsVisibleMotor();
+
+        public bool CanCotnrolMotor1
+        {
+            get { return _canControlMotor[0]; }
+            set
+            {
+                SetProperty(ref _canControlMotor[0], value);
+                if (!value)
+                {
+                    Info.MotorValue1 = Bcore.StopMotorPwm;
+                }
+            }
+        }
+
+        public bool CanCotnrolMotor2
+        {
+            get { return _canControlMotor[1]; }
+            set
+            {
+                SetProperty(ref _canControlMotor[1], value);
+                if (!value)
+                {
+                    Info.MotorValue2 = Bcore.StopMotorPwm;
+                }
+            }
+        }
+
+        public bool CanCotnrolMotor3
+        {
+            get { return _canControlMotor[2]; }
+            set
+            {
+                SetProperty(ref _canControlMotor[2], value);
+                if (!value)
+                {
+                    Info.MotorValue3 = Bcore.StopMotorPwm;
+                }
+            }
+        }
+
+        public bool CanCotnrolMotor4
+        {
+            get { return _canControlMotor[3]; }
+            set
+            {
+                SetProperty(ref _canControlMotor[3], value);
+                if (!value)
+                {
+                    Info.MotorValue4 = Bcore.StopMotorPwm;
+                }
+            }
+        }
+
 
         #endregion
 
@@ -91,6 +143,10 @@ namespace bCoreDriver.ViewModels
         public bool IsVisibleServo2 => IsVisibleServo();
         public bool IsVisibleServo3 => IsVisibleServo();
         public bool IsVisibleServo4 => IsVisibleServo();
+
+        public bool IsEnabledServo2 => !Settings?.ServoSettings[1].IsSync ?? false;
+        public bool IsEnabledServo3 => !Settings?.ServoSettings[2].IsSync ?? false;
+        public bool IsEnabledServo4 => !Settings?.ServoSettings[3].IsSync ?? false;
 
         #endregion
 
@@ -122,12 +178,26 @@ namespace bCoreDriver.ViewModels
 
         public async void Init(DeviceInformation info)
         {
-            Info = new BcoreInfo();
+            if (Info == null || Info.DeviceName != info.Name)
+            {
+                if (Info != null) Info.ConnectionChanged -= OnBcoreConnectionChanged;
+                Info?.Dispose();
+                Info = new BcoreInfo();
+                Info.ConnectionChanged += OnBcoreConnectionChanged;
+            }
+            else if (!Info.Manager.IsInitialized)
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Low, AppFrame.GoBack);
+                return;
+            }
+
             var result = await Info.Init(info);
 
             if (!result)
             {
                 //ToDo: show message box
+                var dialog = new MyMessageDialog($"Failed to connect bCore \"{Info.DeviceName}\".");
+                await dialog.ShowAsync();
                 AppFrame.GoBack();
                 return;
             }
@@ -156,6 +226,7 @@ namespace bCoreDriver.ViewModels
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () =>
             {
+                if (Info == null) return;
                 BatteryVoltage = await Info.ReadBatteryVoltage();
             });
         }
@@ -179,6 +250,14 @@ namespace bCoreDriver.ViewModels
             else
                 CountRightSlider = 0;
 
+            if (AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile")
+            {
+                CanCotnrolMotor1 = true;
+                CanCotnrolMotor2 = true;
+                CanCotnrolMotor3 = true;
+                CanCotnrolMotor4 = true;
+            }
+
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
                 OnPropertyChanged(nameof(IsVisibleMotor1));
@@ -191,10 +270,16 @@ namespace bCoreDriver.ViewModels
                 OnPropertyChanged(nameof(IsVisibleServo3));
                 OnPropertyChanged(nameof(IsVisibleServo4));
 
+                OnPropertyChanged(nameof(IsEnabledServo2));
+                OnPropertyChanged(nameof(IsEnabledServo3));
+                OnPropertyChanged(nameof(IsEnabledServo4));
+
                 OnPropertyChanged(nameof(IsVisiblePortOut1));
                 OnPropertyChanged(nameof(IsVisiblePortOut2));
                 OnPropertyChanged(nameof(IsVisiblePortOut3));
                 OnPropertyChanged(nameof(IsVisiblePortOut4));
+
+                OnPropertyChanged(nameof(Info));
             });
         }
 
@@ -238,6 +323,19 @@ namespace bCoreDriver.ViewModels
             else if (param.Type == ESliderType.Servo)
             {
                 Info.WriteServoValue(param.Idx, true);
+            }
+        }
+
+        private async void OnBcoreConnectionChanged(object sender, bool isConnected)
+        {
+            if (!isConnected)
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () =>
+                {
+                    var dialog = new MyMessageDialog($"Disconnected bCore \"{Info.DeviceName}\".");
+                    await dialog.ShowAsync();
+                    if (AppFrame.CanGoBack) AppFrame.GoBack();
+                });
             }
         }
 

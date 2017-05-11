@@ -1,10 +1,10 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
+    "Microsoft.Toolkit.Uwp.Notifications": "1.0.0",
     "Microsoft.Xaml.Behaviors.Uwp.Managed": "1.1.0",
     "Newtonsoft.Json": "9.0.1",
-    "Prism.Windows": "6.0.2-pre1",
-    "Template10": "1.1.12-preview-160712"
+    "Prism.Windows": "6.0.2"
   },
   "frameworks": {
     "uap10.0": {}

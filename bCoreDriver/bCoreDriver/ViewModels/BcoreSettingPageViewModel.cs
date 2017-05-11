@@ -71,7 +71,7 @@ namespace bCoreDriver.ViewModels
 
         #region method
 
-        public async void Init(BcoreInfo info)
+        public void Init(BcoreInfo info)
         {
             Info = info;
 

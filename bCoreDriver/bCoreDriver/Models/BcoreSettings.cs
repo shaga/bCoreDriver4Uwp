@@ -146,6 +146,8 @@ namespace bCoreDriver.Models
 
             await dispacther.RunAsync(CoreDispatcherPriority.Low, () =>
             {
+                OnPropertyChanged(nameof(BcoreName));
+
                 for (var i = 0; i < 4; i++)
                 {
                     MotorSettings[i].Init();
